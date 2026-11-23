@@ -7,10 +7,10 @@ struct) and draws every letter from a bitmap font defined below, because
 the grader image ships no PIL and no system fonts.
 
 Layout, top to bottom: top bar (paper name + story count) -- giant date
-masthead -- maroon ticker -- six-number stat strip -- "THE DAY IN UTC"
-timeline -- three big lead cards -- seven medium cards -- a row with the
-tenth card, a world map with numbered pins and a red DATE CHECK box --
-numbered briefs -- footer with sources and press time.
+masthead -- maroon ticker -- six-number stat strip -- three big lead cards
+-- seven medium cards -- a row with the tenth card, a world map with
+numbered pins and a red DATE CHECK box -- numbered briefs -- footer with
+sources and press time.
 
 Facts come from the verified research notes (every story checked against
 at least two outlets). Nothing in this file is invented: every number,
@@ -1234,17 +1234,17 @@ def source_line(cv, x, y, sources):
 
 def lead_card(cv, x, y, w, h, num, tag, region, headline, body, sources, visual):
     card_frame(cv, x, y, w, h)
-    vh = 96
+    vh = 108
     visual(cv, x + 1, y + 1, w - 2, vh)
     num_badge(cv, x + 4, y + 4, num)
     tag_chip(cv, x + w - int(text_w(tag, 0.62)) - 15, y + vh - 18, tag)
     ty = y + vh + 6
     draw_text(cv, x + 8, ty, region, 0.6, MAROON, heavy=True)
     ty += 11
-    for ln in wrap(headline, 1.0, w - 16):
-        draw_text(cv, x + 8, ty, ln, 1.0, INK, heavy=XHEAVY)
-        ty += 13
-    ty += 2
+    for ln in wrap(headline, 1.25, w - 16):
+        draw_text(cv, x + 8, ty, ln, 1.25, INK, heavy=XHEAVY)
+        ty += 16
+    ty += 4
     ty = draw_para(cv, x + 8, ty, body, 0.72, w - 16, x + w - 8, 9)
     source_line(cv, x + 8, y + h - 11, sources)
 
@@ -1259,22 +1259,35 @@ def med_card(cv, x, y, w, h, num, tag, region, headline, body, sources, visual):
     ty = y + 6
     draw_text(cv, tx, ty, region, 0.58, MAROON, heavy=True)
     ty += 10
-    for ln in wrap(headline, 0.88, tw):
-        draw_text(cv, tx, ty, ln, 0.88, INK, heavy=XHEAVY)
-        ty += 12
-    ty += 1
-    draw_para(cv, tx, ty, body, 0.66, tw, tx + tw, 8.5)
+    for ln in wrap(headline, 1.1, tw):
+        draw_text(cv, tx, ty, ln, 1.1, INK, heavy=XHEAVY)
+        ty += 14
+    ty += 3
+    draw_para(cv, tx, ty, body, 0.72, tw, tx + tw, 9)
     draw_text(cv, tx, y + h - 11, sources, 0.55, GREY)
     tag_chip(cv, x + w - int(text_w(tag, 0.62)) - 14, y + h - 13, tag)
 
 
 # --- scene painters: each gets (cv, x, y, w, h) and draws a labelled scene
 def vis_cop31(cv, x, y, w, h):
+    # A negotiation table with empty chairs: the summit collapsed, nobody
+    # stayed to sign. The table carries the COP31 nameplate and three
+    # flags; the struck-through FOSSIL FUELS line names the reason.
     cv.rect(x, y, w, h, NAVY)
-    for i in range(4):  # rows of delegate desks
-        cv.rect(x + 12 + i * 6, y + h - 46 + i * 9, w - 24 - i * 12, 5, NAVY_LT)
-    cv.rect(x + w // 2 - 26, y + 12, 52, 26, GOLD)  # podium
-    draw_text(cv, x + w // 2 - 17, y + 20, "COP31", 0.9, NAVY, heavy=True)
+    draw_text(cv, x + 24, y + 6, "ANTALYA - 44 HOURS OVERTIME", 0.6, GOLD_LT)
+    for i in range(5):  # empty chairs behind the table
+        cx = x + 36 + i * 56
+        cv.rect(cx, y + 28, 22, 20, TAN_DK)
+        cv.rect(cx, y + 46, 22, 8, TAN)
+    cv.rect(x + 12, y + 54, w - 24, 12, TAN)  # the table
+    cv.rect(x + 12, y + 64, w - 24, 2, TAN_DK)
+    for px in (x + 44, x + 155, x + 266):  # papers left on the table
+        cv.rect(px, y + 50, 16, 4, PAPER)
+    for fx, fc in ((x + 80, BLUE), (x + 170, GREEN), (x + 260, GOLD_LT)):
+        cv.line(fx, y + 54, fx, y + 40, PAPER, 1)  # flag poles
+        cv.rect(fx, y + 40, 12, 8, fc)
+    cv.rect(x + w // 2 - 30, y + 56, 60, 8, GOLD)  # nameplate
+    draw_text(cv, x + w // 2 - 11, y + 57, "COP31", 0.55, NAVY, heavy=True)
     draw_text(cv, x + 10, y + h - 30, "FOSSIL FUELS", 0.85, PAPER, heavy=True)
     cv.line(x + 8, y + h - 16, x + 118, y + h - 30, RED, 3)  # struck through
     cv.rect(x + w - 118, y + h - 34, 108, 24, RED)
@@ -1286,14 +1299,15 @@ def vis_trump(cv, x, y, w, h):
     cv.rect(x, y, w, h, SEA)
     cv.rect(x, y, w, 22, SKY)
     cv.disc(x + w - 26, y + 12, 8, GOLD_LT)
-    for cx in (x + 30, x + w // 2 + 10):  # two carriers
-        cv.rect(cx, y + h - 34, 74, 10, NAVY)
+    for cx in (x + 30, x + w // 2 + 10):  # two carriers, white hulls on the sea
+        cv.rect(cx, y + h - 34, 74, 10, PAPER)
+        cv.rect(cx, y + h - 34, 74, 2, NAVY)
         cv.rect(cx + 52, y + h - 52, 12, 18, NAVY)
         cv.rect(cx + 6, y + h - 44, 62, 10, NAVY_LT)
-    for i in range(3):  # tanker convoy
+    for i in range(3):  # tanker convoy, bright orange against the blue
         tx = x + w - 96 + i * 26
-        cv.rect(tx, y + h - 24, 22, 8, MAROON)
-        cv.rect(tx + 4, y + h - 32, 8, 8, MAROON)
+        cv.rect(tx, y + h - 24, 22, 8, ORANGE)
+        cv.rect(tx + 4, y + h - 32, 8, 8, ORANGE)
     cv.rect(x, y + h - 22, w, 22, INK)
     draw_text(cv, x + 8, y + h - 18, '"BOTTOM OF THE SEA"', 0.85, PAPER, heavy=True)
     draw_text(cv, x + 24, y + 4, "ARABIAN SEA - 2 US CARRIER GROUPS", 0.6, NAVY)
@@ -1396,6 +1410,10 @@ def vis_liverpool(cv, x, y, w, h):
     cv.rect(x + 14, y + 62, 12, 18, RED)
     cv.outline(x + 14, y + 62, 12, 18, PAPER, 1)
     draw_text(cv, x + 34, y + 67, "RED CARD 8'", 0.7, PAPER, heavy=True)
+    cv.rect(x + 8, y + 88, w - 16, 18, GREEN)  # pitch strip
+    cv.line(x + 8, y + 97, x + w - 8, y + 97, PAPER, 1)
+    cv.line(x + w // 2, y + 88, x + w // 2, y + 106, PAPER, 1)
+    cv.disc(x + w // 2 + 18, y + 97, 3, PAPER)
     draw_text(cv, x + 8, y + h - 16, "POCHETTINO'S DEBUT", 0.6, PAPER)
 
 # ------------------------------------------------------------- world map
@@ -1407,11 +1425,14 @@ CONTINENTS = [
     [(-10, 36), (-9, 38), (-9, 43), (-2, 44), (-1, 46), (0, 49), (2, 51), (5, 53), (8, 55), (8, 57), (10, 59), (12, 56), (18, 56), (21, 55), (24, 58), (24, 60), (28, 61), (30, 62), (30, 70), (35, 68), (40, 67), (44, 68), (48, 64), (44, 60), (40, 55), (38, 50), (35, 46), (32, 46), (30, 45), (28, 44), (27, 41), (23, 36), (22, 38), (19, 40), (16, 40), (12, 44), (8, 44), (3, 43), (0, 39), (-2, 37), (-6, 36), (-9, 37)],
     [(113, -22), (114, -28), (115, -33), (118, -35), (124, -33), (129, -32), (132, -32), (135, -35), (138, -35), (140, -38), (145, -38), (150, -37), (153, -32), (153, -27), (150, -23), (146, -19), (142, -11), (140, -17), (136, -12), (132, -11), (130, -13), (126, -14), (122, -17), (118, -20), (114, -21)],
 ]
-# (card number, longitude, latitude)
+# (card number, longitude, latitude, pin offset x, pin offset y)
+# Offsets spread the Europe cluster so the discs stop touching; each pin
+# stays within a few px of its true spot.
 PINS = [
-    ("1", 30.7, 36.9), ("2", 56.5, 26.5), ("3", 20.1, 32.1), ("3", 27.0, 60.0),
-    ("4", 106.1, -6.4), ("5", 30.5, 50.5), ("6", 127.0, 37.5), ("7", 77.2, 28.6),
-    ("8", 7.7, 45.1), ("9", -8.5, 37.1), ("10", -3.0, 53.4),
+    ("1", 30.7, 36.9, 8, 8), ("2", 56.5, 26.5, 0, 0), ("3", 20.1, 32.1, 0, 0),
+    ("3", 27.0, 60.0, 0, -12), ("4", 106.1, -6.4, 0, 0), ("5", 30.5, 50.5, -8, -2),
+    ("6", 127.0, 37.5, 0, 0), ("7", 77.2, 28.6, 0, 0), ("8", 7.7, 45.1, -6, 6),
+    ("9", -8.5, 37.1, -8, 8), ("10", -3.0, 53.4, 4, -6),
 ]
 
 
@@ -1424,9 +1445,9 @@ def draw_map(cv, x, y, w, h):
     for poly in CONTINENTS:
         pts = [(mx + (lon + 180) / 360 * mw, my + (75 - lat) / 130 * mh) for lon, lat in poly]
         cv.poly(pts, TAN)
-    for num, lon, lat in PINS:
-        px = mx + (lon + 180) / 360 * mw
-        py = my + (75 - lat) / 130 * mh
+    for num, lon, lat, dx, dy in PINS:
+        px = mx + (lon + 180) / 360 * mw + dx
+        py = my + (75 - lat) / 130 * mh + dy
         cv.disc(px, py, 6, RED)
         cv.outline(int(px - 6), int(py - 6), 12, 12, PAPER, 1)
         s = 0.55 if len(num) == 1 else 0.48
@@ -1459,80 +1480,60 @@ def draw_date_check(cv, x, y, w, h):
 LEADS = [
     dict(num=1, tag="CONFIRMED", region="GLOBAL - CLIMATE",
          headline="COP31 COLLAPSES: NO DEAL AFTER 44 HOURS",
-         body=("The closing plenary in Antalya ended on Sunday with no agreement. "
-               "Murat Kurum told delegates: 'I understand that there is no agreement on this text.' "
-               "The Antalya Pact was not adopted. It is the longest climate summit ever, and the first "
-               "to end with no cover decision since 2000. The draft left out fossil fuels entirely, so "
-               "the EU, UK, Norway, Panama and island states rejected it. China and India accepted it. "
-               "Next: COP32 in Addis Ababa, 8-19 Nov 2027."),
+         body=("The closing plenary in Antalya ended on Sunday with no agreement after 44 hours of "
+               "overtime. The draft left out fossil fuels, so the EU, UK, Norway, Panama and island "
+               "states rejected it. It is the longest summit ever, and the first with no cover "
+               "decision since 2000."),
          sources="UN News, AP, Reuters, NYT, Guardian", visual=vis_cop31),
     dict(num=2, tag="CLAIM", region="MIDDLE EAST - SECURITY",
          headline="TRUMP: NEW IRAN STRIKES AFTER NEW YEAR IF TALKS FAIL",
          body=("In a Fox News interview on Sunday, President Donald Trump said he is 'inclined' to resume "
                "large-scale strikes on Iran after 1 January 2027 if negotiations fail. He warned Iranian "
-               "ships testing the US naval blockade 'will all be at the bottom of the sea, like Iran's navy.' "
-               "Two US carrier strike groups are in the Arabian Sea. More than 14 Iranian tankers sit off "
-               "Kharg Island, Iran's main crude export hub. No decision to strike has been announced."),
+               "ships testing the US blockade 'will all be at the bottom of the sea.'"),
          sources="Fox News, Euronews", visual=vis_trump),
     dict(num=3, tag="REPORTED", region="EUROPE - WAR AT SEA",
          headline="TWO RUSSIAN SHIPS HIT IN 24 HOURS, 2,000 MILES APART",
-         body=("The corvette Merkury capsized and sank at its pier in Benghazi, Libya, on Sunday after a "
-               "suspected Ukrainian sea-drone strike. Two drones hit; 10 people were slightly hurt. A day "
-               "earlier, the cargo ship Sparta II was hit by drones in the Gulf of Finland. Its 16 crew "
-               "were evacuated, and Finnish and Estonian crews towed it out on Sunday night. Finland's "
-               "Border Guard confirmed a Ukrainian drone strike hit Sparta II. No one has claimed the "
-               "Merkury attack."),
+         body=("The corvette Merkury capsized and sank at its pier in Benghazi on Sunday after a "
+               "suspected Ukrainian sea-drone strike. A day earlier, the cargo ship Sparta II was hit in "
+               "the Gulf of Finland; Finland confirmed a Ukrainian drone strike hit it."),
          sources="WSJ, CNN, AP, AFP", visual=vis_ships),
 ]
 MEDIUM = [
     dict(num=4, tag="CONFIRMED", region="ASIA-PACIFIC - DISASTER",
          headline="CIKANDE FIRE: 24 DEAD, ABOUT 30 STILL MISSING",
-         body=("Indonesia confirmed on Monday that 24 people died in the fire at the PT Fonusa Agung Mulia "
-               "candy factory in Cikande, Banten. About 30 people are still missing. The search resumed at "
-               "07:00 WIB on Monday. 29 people are confirmed safe, 5 in hospital. The roof collapsed; "
-               "hotspots and an unstable structure still hamper rescuers."),
+         body=("The Cikande candy-factory fire killed 24 people, Indonesia confirmed on Monday. About "
+               "30 are still missing; 29 are confirmed safe, 5 in hospital."),
          sources="Reuters, People", visual=vis_cikande),
     dict(num=5, tag="CONFIRMED", region="EUROPE - UKRAINE",
          headline="BOY, 7, ALIVE AFTER 14 HOURS UNDER RUBBLE",
-         body=("Rescuers pulled 7-year-old David alive from a five-storey block in Dymer, 45 km north of "
-               "Kyiv, almost 14 hours after a Russian Shahed drone struck at 05:00 on Sunday. At least 11 "
-               "were killed in Dymer, at least 15 across the Kyiv region. A 79-year-old woman was also "
-               "rescued alive. 11 more are missing, including 2 children."),
+         body=("Rescuers pulled 7-year-old David alive from the rubble in Dymer, almost 14 hours after a "
+               "drone struck on Sunday. At least 11 were killed in Dymer, at least 15 across the region."),
          sources="BBC, The Gaze, Al Jazeera", visual=vis_kyiv),
     dict(num=6, tag="CONFIRMED", region="ASIA-PACIFIC - MARKETS",
-         headline="KOREA PASSES $1 TRILLION IN EXPORTS AS STOCKS CRASH",
-         body=("South Korea's 2026 exports passed $1 trillion on 19 November, the 4th country ever to do "
-               "so. November exports run at double last year's pace: $77.4bn for 1-20 Nov, up 101.5%. But "
-               "on Monday the KOSPI opened 2.77% lower and fell toward a 10-month low. The government is "
-               "readying its stock stabilisation fund for the first time in 18 years."),
+         headline="KOREA TOPS $1 TRILLION AS STOCKS CRASH",
+         body=("South Korea's 2026 exports passed $1 trillion, the 4th country ever to do so. But on "
+               "Monday the KOSPI opened 2.77% lower and fell toward a 10-month low."),
          sources="Aju Press, KED Global, Reuters", visual=vis_korea),
     dict(num=7, tag="CONFIRMED", region="ASIA-PACIFIC - POLITICS",
          headline="INDIA AGREES $1.62BN PACKAGE FOR NEPAL",
-         body=("India agreed a NPR 24,000 crore ($1.62bn) package for Nepal: a NPR 5,600 crore grant "
-               "plus a NPR 18,400 crore credit line for flood recovery and energy. PM Balendra Shah met "
-               "PM Narendra Modi in New Delhi on Monday, his first trip abroad as PM. They signed 8 MoUs "
-               "and launched the Ayodhya-Janakpur train."),
+         body=("India agreed a NPR 24,000 crore ($1.62bn) package for Nepal: NPR 5,600 crore grant, "
+               "NPR 18,400 crore credit. PM Shah met PM Modi in New Delhi on Monday; 8 MoUs signed."),
          sources="Joint press release, TBS, ANI", visual=vis_nepal),
     dict(num=8, tag="CONFIRMED", region="SPORT - TENNIS",
-         headline="ALCARAZ BEATS ZVEREV FOR FIRST ATP FINALS TITLE",
-         body=("Carlos Alcaraz beat world No. 1 Alexander Zverev 6-2, 7-6(7) in the ATP Finals final in "
-               "Turin on Sunday, finishing at about 00:10 WIB on Monday. He saved 3 set points at 6-3 down "
-               "and won the tiebreak 9-7. It is his first year-end title, capping a 14-match winning streak "
-               "after a wrist injury. Cheque: a record $5,171,000."),
+         headline="ALCARAZ WINS FIRST ATP FINALS TITLE",
+         body=("Carlos Alcaraz beat world No. 1 Alexander Zverev 6-2, 7-6(7) to win the ATP Finals. He "
+               "saved 3 set points and won the tiebreak 9-7."),
          sources="Reuters, BBC", visual=vis_alcaraz),
     dict(num=9, tag="CONFIRMED", region="SPORT - MOTOGP",
-         headline="MARQUEZ WINS 8TH MOTOGP TITLE, LEVEL WITH AGOSTINI",
-         body=("Marc Marquez clinched the 2026 MotoGP title on Sunday with an 8th-place finish at the "
-               "Portuguese Grand Prix in Portimao. He equals Giacomo Agostini's record of 8 premier-class "
-               "titles. He trailed Bezzecchi by 102 points after round 7, the biggest deficit overturned. "
-               "He has 439 points, 43 clear of Martin."),
+         headline="MARQUEZ WINS 8TH MOTOGP TITLE",
+         body=("Marc Marquez clinched the MotoGP title with an 8th-place finish in Portimao, equalling "
+               "Agostini's record of 8 titles. He trailed Bezzecchi by 102 points after round 7."),
          sources="Reuters, AP, MotoGP.com", visual=vis_marquez),
     dict(num=10, tag="CONFIRMED", region="SPORT - FOOTBALL",
          headline="LIVERPOOL ROUT 10-MAN UTD 4-0",
-         body=("Mauricio Pochettino's first match as United manager ended in a 4-0 rout at Liverpool on "
-               "Sunday. United went down to 10 men after 8 minutes and were 2-0 down at 13. Szoboszlai "
-               "scored at 10', Wirtz at 13', Ngumoha at 66', Munoz at 82'. It is the joint-heaviest defeat "
-               "for a United manager in his first game since 1926."),
+         body=("Pochettino's first match as United manager ended in a 4-0 rout at Liverpool. United "
+               "went down to 10 men after 8 minutes. Goals: Szoboszlai 10', Wirtz 13', Ngumoha 66', "
+               "Munoz 82'."),
          sources="Reuters, The Times, TNT Sports", visual=vis_liverpool),
 ]
 BRIEFS = [
@@ -1561,8 +1562,8 @@ STATS = [
     ("44", "HOURS COP31 OVERTIME"),
     ("24", "DEAD IN CIKANDE FIRE"),
     ("$1TN", "KOREA EXPORTS"),
-    ("258", "DEMOCRATS' HOUSE SEATS"),
-    ("6.5", "VANUATU QUAKE"),
+    ("258", "SEATS, LARGEST SINCE 1992"),
+    ("14", "HOURS UNDER RUBBLE"),
     ("8", "MARQUEZ TITLES"),
 ]
 TIMELINE = [
@@ -1592,49 +1593,43 @@ def main():
     tick = ("COP31 NO DEAL  -  TRUMP THREATENS IRAN STRIKES  -  BOY, 7, ALIVE AFTER 14 HOURS  -  "
             "ALCARAZ WINS ATP FINALS  -  MARQUEZ 8TH TITLE")
     centre_text(cv, W // 2, 82, tick, 0.62, PAPER)
-    # stat strip, two calm alternating tones
+    # stat strip, two calm alternating tones (taller: numbers ~1.7x the old size)
     for i, (num, lab) in enumerate(STATS):
         x = 8 + i * 168
-        cv.rect(x, 96, 168, 44, PAPER if i % 2 == 0 else (232, 236, 242))
-        cv.outline(x, 96, 168, 44, GREY_LT, 1)
-        centre_text(cv, x + 84, 100, num, 1.5, NAVY if i % 2 == 0 else MAROON, heavy=True)
-        centre_text(cv, x + 84, 124, lab, 0.55, GREY)
-    # timeline strip
-    cv.rect(0, 140, W, 26, NAVY_LT)
-    draw_text(cv, 8, 147, "THE DAY IN UTC", 0.66, GOLD_LT, heavy=True)
-    tx = 128
-    for t, what in TIMELINE:
-        draw_text(cv, tx, 147, t, 0.66, PAPER, heavy=True)
-        tx += int(text_w(t, 0.66)) + 5
-        draw_text(cv, tx, 147, what, 0.58, PAPER)
-        tx += int(text_w(what, 0.58)) + 18
+        cv.rect(x, 96, 168, 54, PAPER if i % 2 == 0 else (232, 236, 242))
+        cv.outline(x, 96, 168, 54, GREY_LT, 1)
+        centre_text(cv, x + 84, 100, num, 2.0, NAVY if i % 2 == 0 else MAROON, heavy=True)
+        centre_text(cv, x + 84, 130, lab, 0.55, GREY)
+    # (timeline strip dropped: the date is already carried by the masthead,
+    # the top-bar line and the date-check box; its height went to the stat
+    # strip and the cards' air)
     # lead cards
     for i, c in enumerate(LEADS):
-        lead_card(cv, 8 + i * 340, 166, 328, 238, c["num"], c["tag"], c["region"],
+        lead_card(cv, 8 + i * 340, 150, 328, 238, c["num"], c["tag"], c["region"],
                   c["headline"], c["body"], c["sources"], c["visual"])
     # medium cards
     for i, c in enumerate(MEDIUM[:3]):
-        med_card(cv, 8 + i * 340, 404, 328, 130, c["num"], c["tag"], c["region"],
+        med_card(cv, 8 + i * 340, 388, 328, 130, c["num"], c["tag"], c["region"],
                  c["headline"], c["body"], c["sources"], c["visual"])
     for i, c in enumerate(MEDIUM[3:6]):
-        med_card(cv, 8 + i * 340, 534, 328, 130, c["num"], c["tag"], c["region"],
+        med_card(cv, 8 + i * 340, 518, 328, 130, c["num"], c["tag"], c["region"],
                  c["headline"], c["body"], c["sources"], c["visual"])
     # bottom row: card 10 + map + date check
     c = MEDIUM[6]
-    med_card(cv, 8, 664, 328, 130, c["num"], c["tag"], c["region"],
+    med_card(cv, 8, 648, 328, 130, c["num"], c["tag"], c["region"],
              c["headline"], c["body"], c["sources"], c["visual"])
-    draw_map(cv, 348, 664, 328, 130)
-    draw_date_check(cv, 688, 664, 328, 130)
+    draw_map(cv, 348, 648, 328, 130)
+    draw_date_check(cv, 688, 648, 328, 130)
     # briefs header
-    cv.line(8, 800, 1016, 800, NAVY, 2)
-    draw_text(cv, 8, 806, "ALSO TODAY - 20 MORE BRIEFS", 0.72, NAVY, heavy=True)
+    cv.line(8, 784, 1016, 784, NAVY, 2)
+    draw_text(cv, 8, 790, "ALSO TODAY - 20 MORE BRIEFS", 0.72, NAVY, heavy=True)
     chips = "ASIA-PACIFIC 7  -  SPORT 9  -  EUROPE 3  -  MIDDLE EAST 3  -  AMERICAS 4  -  AFRICA 2  -  GLOBAL 2"
-    draw_text(cv, W - 8 - text_w(chips, 0.58), 808, chips, 0.58, GREY)
+    draw_text(cv, W - 8 - text_w(chips, 0.58), 792, chips, 0.58, GREY)
     # briefs, three columns, numbered 11-30, each with its own sources
     cols = [BRIEFS[0:7], BRIEFS[7:14], BRIEFS[14:20]]
     for ci, col in enumerate(cols):
         bx = 8 + ci * 340
-        by = 824
+        by = 808
         for j, (head, detail, src) in enumerate(col):
             n = 11 + ci * 7 + j
             draw_text(cv, bx, by, "%d. %s" % (n, head), 0.62, INK, heavy=XHEAVY)
